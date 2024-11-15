@@ -14,12 +14,23 @@ ENV USER_GID=${USER_GID}
 USER root
 
 ENV ACCEPT_EULA=Y
-RUN apt-get update; apt-get -y upgrade; true
+
+# 备份原始的 sources.list 文件
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+
+# 创建新的 sources.list 文件，指定阿里云的 APT 源
+RUN echo "deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse" > /etc/apt/sources.list
+RUN echo "deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse" >> /etc/apt/sources.list
+RUN echo "deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse" >> /etc/apt/sources.list
+RUN echo "deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse" >> /etc/apt/sources.list
+
+RUN apt-get update && apt-get -y upgrade
+
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends binutils net-tools git wget vim curl adduser sudo locales zip unzip xz-utils bzip2 upx make cmake strace binutils; echo
 RUN apt install -y ca-certificates && update-ca-certificates
 RUN locale-gen ko_KR.utf8 en_US.utf8
 
-RUN deluser ubuntu; echo
+RUN deluser ubuntu
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --password $USERPASS -m --gid $USER_GID -m $USERNAME --shell /bin/bash
 RUN echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
