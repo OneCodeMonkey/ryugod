@@ -1,7 +1,0 @@
-ARG FROM_IMAGE=ryusatgat/ubuntu
-FROM $FROM_IMAGE
-
-ADD opt /opt/
-ADD usr /usr/
-
-USER $USERNAME
